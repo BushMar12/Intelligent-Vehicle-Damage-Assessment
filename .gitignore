@@ -1,0 +1,84 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Environment
+.env
+.env.local
+*.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Model weights (large files)
+*.pt
+*.pth
+*.onnx
+*.engine
+models/*.pt
+models/*.pth
+
+# Training outputs
+runs/
+outputs/
+wandb/
+mlruns/
+
+# Data (large files)
+data/
+*.zip
+*.tar.gz
+
+# Flutter
+mobile/vehicle_damage_app/.dart_tool/
+mobile/vehicle_damage_app/.packages
+mobile/vehicle_damage_app/build/
+mobile/vehicle_damage_app/.flutter-plugins
+mobile/vehicle_damage_app/.flutter-plugins-dependencies
+mobile/vehicle_damage_app/ios/
+mobile/vehicle_damage_app/macos/
+mobile/vehicle_damage_app/android/
+mobile/vehicle_damage_app/web/.last_build_id
+*.iml
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Backend
+backend/venv/
+backend/uploads/
+backend/outputs/
+backend/__pycache__/
+
+# Notebooks outputs
+notebooks/runs/
+notebooks/*.pt
+notebooks/outputs/

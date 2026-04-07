@@ -1,0 +1,131 @@
+# Training Configuration for Vehicle Damage Assessment
+# =====================================================
+
+project:
+  name: "Vehicle-Damage-Assessment"
+  description: "Deep learning-based vehicle damage detection and assessment"
+  version: "1.0.0"
+
+# Dataset Configuration
+dataset:
+  root_path: "../data/CarDD/CarDD_COCO"
+  train_images: "train2017"
+  val_images: "val2017"
+  test_images: "test2017"
+  annotations:
+    train: "annotations/instances_train2017.json"
+    val: "annotations/instances_val2017.json"
+    test: "annotations/instances_test2017.json"
+  
+  # Damage categories mapping
+  categories:
+    1: "dent"
+    2: "scratch"
+    3: "crack"
+    4: "glass shatter"
+    5: "lamp broken"
+    6: "tire flat"
+
+  # Number of classes
+  num_classes: 6
+
+# Training Hyperparameters
+training:
+  # Common settings
+  epochs: 100
+  batch_size: 16
+  image_size: 640
+  workers: 8
+  
+  # Optimizer settings
+  optimizer:
+    name: "AdamW"
+    lr: 0.001
+    weight_decay: 0.0005
+    momentum: 0.937  # For SGD
+  
+  # Learning rate scheduler
+  scheduler:
+    name: "cosine"
+    warmup_epochs: 3
+    min_lr: 0.0001
+  
+  # Augmentation
+  augmentation:
+    hsv_h: 0.015
+    hsv_s: 0.7
+    hsv_v: 0.4
+    degrees: 0.0
+    translate: 0.1
+    scale: 0.5
+    shear: 0.0
+    flipud: 0.0
+    fliplr: 0.5
+    mosaic: 1.0
+    mixup: 0.0
+
+# Model-specific configurations
+models:
+  yolo11m:
+    pretrained: true
+    weights: "yolo11m.pt"
+    
+  yolov8m:
+    pretrained: true
+    weights: "yolov8m.pt"
+    
+  faster_rcnn:
+    backbone: "resnet50_fpn"
+    pretrained_backbone: true
+    trainable_backbone_layers: 3
+    min_size: 640
+    max_size: 1024
+    
+  rt_detr:
+    pretrained: true
+    weights: "rtdetr-l.pt"
+
+# Evaluation settings
+evaluation:
+  iou_threshold: 0.5
+  conf_threshold: 0.25
+  nms_threshold: 0.45
+  metrics:
+    - "mAP@0.5"
+    - "mAP@0.5:0.95"
+    - "precision"
+    - "recall"
+    - "f1"
+    - "inference_time"
+
+# ClearML Configuration
+clearml:
+  project_name: "Vehicle-Damage-Assessment"
+  task_name: "Model-Comparison"
+  auto_connect_frameworks: true
+  output_uri: null  # Will use default
+
+# Cost estimation configuration
+cost_estimation:
+  base_costs:
+    dent: 200
+    scratch: 150
+    crack: 300
+    glass_shatter: 500
+    lamp_broken: 250
+    tire_flat: 150
+  
+  severity_multipliers:
+    small: 1.0    # area < 5%
+    medium: 2.0   # 5% <= area < 15%
+    large: 3.5    # area >= 15%
+  
+  labor_rate_per_hour: 75
+  currency: "USD"
+
+# Inference settings (for backend)
+inference:
+  model_path: "../models/best_model.pt"
+  confidence_threshold: 0.25
+  iou_threshold: 0.45
+  max_detections: 100
