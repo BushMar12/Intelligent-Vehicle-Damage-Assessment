@@ -39,7 +39,12 @@ async def chat_with_bot(req: ChatRequest, db: AsyncSession = Depends(get_db)):
         
     user_message = {"role": "user", "content": req.message}
     
-    context_str = f"You are an AI assistant for a vehicle damage assessment tool. The current assessment JSON report is: {assessment.report_json}\\nCost JSON: {assessment.cost_estimation_json}\\nAnswer the user's question based on this data."
+    context_str = (
+        f"You are an AI assistant for a vehicle damage assessment tool. "
+        f"The current assessment JSON report is: {assessment.report_json}\n"
+        f"Cost JSON: {assessment.cost_estimation_json}\n"
+        f"Answer the user's question based on this data."
+    )
     
     messages = [
         {"role": "system", "content": context_str},
@@ -57,7 +62,8 @@ async def chat_with_bot(req: ChatRequest, db: AsyncSession = Depends(get_db)):
     try:
         response = await client.chat.completions.create(
             model=model_name,
-            messages=messages
+            messages=messages,
+            timeout=30.0
         )
         bot_text = response.choices[0].message.content
         

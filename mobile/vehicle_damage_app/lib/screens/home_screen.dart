@@ -251,6 +251,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           includeLabor: includeLabor,
           currency: currency,
         );
+        state.setCostEstimation(costResult);
+
+        // Generate report so Ask AI is available
+        state.setStatus(AssessmentStatus.generatingReport, message: 'Generating report...');
+        final reportResult = await api.generateReport(
+          detections: videoResult.aggregatedDetections,
+          costEstimation: costResult,
+        );
+        state.setReport(reportResult);
+        debugPrint('✓ Video report generated: \${reportResult.reportId}');
         
         state.setStatus(AssessmentStatus.complete, message: 'Analysis complete');
         
@@ -261,11 +271,19 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               builder: (_) => VideoResultsScreen(
                 videoResult: videoResult,
                 costResult: costResult,
+                reportResult: reportResult,
               ),
             ),
           );
         }
       } else {
+        // No damage — still generate a report so Ask AI works
+        state.setStatus(AssessmentStatus.generatingReport, message: 'Generating report...');
+        final reportResult = await api.generateReport(
+          detections: [],
+        );
+        state.setReport(reportResult);
+
         state.setStatus(AssessmentStatus.complete, message: 'No damage detected in video');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -274,11 +292,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         }
       }
     } catch (e) {
-      state.setError('Video analysis failed: $e');
+      state.setError('Video analysis failed: \$e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text('Error: \$e'),
             backgroundColor: Colors.red,
           ),
         );

@@ -4,15 +4,18 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../models/damage_models.dart';
+import 'chat_screen.dart';
 
 class VideoResultsScreen extends StatefulWidget {
   final VideoDetectionResponse videoResult;
   final CostEstimationResponse costResult;
+  final ReportResponse? reportResult;
 
   const VideoResultsScreen({
     super.key,
     required this.videoResult,
     required this.costResult,
+    this.reportResult,
   });
 
   @override
@@ -26,11 +29,25 @@ class _VideoResultsScreenState extends State<VideoResultsScreen> {
   Widget build(BuildContext context) {
     final result = widget.videoResult;
     final cost = widget.costResult;
+    final report = widget.reportResult;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Video Analysis Results'),
       ),
+      floatingActionButton: report != null
+          ? FloatingActionButton.extended(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => ChatScreen(assessmentId: report.reportId),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.smart_toy_outlined),
+              label: const Text('Ask AI'),
+            )
+          : null,
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),

@@ -34,21 +34,25 @@ class Settings(BaseSettings):
         "glass shatter", "lamp broken", "tire flat"
     ]
     
-    # Cost estimation base costs (USD)
-    COST_DENT: float = 200.0
-    COST_SCRATCH: float = 150.0
-    COST_CRACK: float = 300.0
-    COST_GLASS_SHATTER: float = 500.0
-    COST_LAMP_BROKEN: float = 250.0
-    COST_TIRE_FLAT: float = 150.0
-    
+    # Cost estimation base costs (AUD — Australian market rates)
+    COST_DENT: float = 350.0
+    COST_SCRATCH: float = 250.0
+    COST_CRACK: float = 450.0
+    COST_GLASS_SHATTER: float = 650.0
+    COST_LAMP_BROKEN: float = 400.0
+    COST_TIRE_FLAT: float = 250.0
+
+    # Currency
+    CURRENCY: str = "AUD"
+    CURRENCY_SYMBOL: str = "$"
+
     # Severity multipliers
     SEVERITY_SMALL: float = 1.0  # area < 5%
     SEVERITY_MEDIUM: float = 2.0  # 5% <= area < 15%
     SEVERITY_LARGE: float = 3.5  # area >= 15%
     
-    # Labor rate
-    LABOR_RATE_PER_HOUR: float = 75.0
+    # Labor rate (AUD per hour)
+    LABOR_RATE_PER_HOUR: float = 120.0
     
     # File upload settings
     MAX_FILE_SIZE: int = 10 * 1024 * 1024  # 10MB

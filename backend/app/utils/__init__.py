@@ -34,8 +34,8 @@ def load_image(source) -> Tuple[np.ndarray, Tuple[int, int]]:
             # Data URL
             image_data = source.split(',')[1]
             img = Image.open(BytesIO(base64.b64decode(image_data)))
-        elif source.startswith('/') or source.startswith('.') or '/' in source:
-            # File path
+        elif source.startswith('/') or source.startswith('.') or (len(source) < 260 and ('/' in source or '\\' in source) and '.' in source.split('/')[-1]):
+            # File path — must start with / or . or look like a real path with extension
             img = Image.open(source)
         else:
             # Assume base64

@@ -334,13 +334,18 @@ def _aggregate_detections(detections: List[Detection]) -> List[Detection]:
     groups = defaultdict(list)
     
     for det in detections:
-        # Create a key based on class and rough location (grid-based)
+        # Create a key based on class and rough location (4x4 grid relative to image)
         center_x = (det.bbox.x_min + det.bbox.x_max) / 2
         center_y = (det.bbox.y_min + det.bbox.y_max) / 2
         
-        # Divide image into 4x4 grid for grouping
-        grid_x = int(center_x // 160)  # Assuming ~640 width
-        grid_y = int(center_y // 160)
+        # Use the bounding box extents to determine image size dynamically.
+        # We divide the image logically into a 4x4 grid using relative coordinates.
+        # Estimate image dimension from the max edge coordinate seen in this detection.
+        img_w_est = det.bbox.x_max * 2 if det.bbox.x_max > 0 else 640
+        img_h_est = det.bbox.y_max * 2 if det.bbox.y_max > 0 else 640
+        
+        grid_x = int((center_x / img_w_est) * 4)
+        grid_y = int((center_y / img_h_est) * 4)
         
         key = (det.class_name, grid_x, grid_y)
         groups[key].append(det)
