@@ -9,18 +9,35 @@ import 'package:http_parser/http_parser.dart';
 import '../models/damage_models.dart';
 
 class ApiService {
-  // Base URL - configure for your environment
-  // For local development: http://localhost:8000
-  // For Android emulator: http://10.0.2.2:8000
-  // For iOS simulator: http://localhost:8000
-  // For AWS SageMaker: https://your-sagemaker-endpoint.amazonaws.com
-  
-  static const String _baseUrl = 'http://localhost:8000';
+  // Base URL - override with:
+  // flutter run/build ... --dart-define=API_BASE_URL=https://your-api.example.com
+  // Useful defaults:
+  // - Android emulator: http://10.0.2.2:8000
+  // - iOS simulator: http://127.0.0.1:8000
+  // - Physical device: use LAN IP or public HTTPS endpoint
+  static const String _defaultBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://127.0.0.1:8000',
+  );
   
   final http.Client _client = http.Client();
   
   /// Set a custom base URL
-  String baseUrl = _baseUrl;
+  String baseUrl = _normalizeBaseUrl(_defaultBaseUrl);
+
+  ApiService({String? baseUrl}) {
+    if (baseUrl != null && baseUrl.trim().isNotEmpty) {
+      this.baseUrl = _normalizeBaseUrl(baseUrl);
+    }
+  }
+
+  static String _normalizeBaseUrl(String url) {
+    final trimmed = url.trim();
+    if (trimmed.endsWith('/')) {
+      return trimmed.substring(0, trimmed.length - 1);
+    }
+    return trimmed;
+  }
   
   /// Headers for API requests
   Map<String, String> get _headers => {
@@ -296,6 +313,46 @@ class ApiService {
     }
   }
   
+  /// Chat with GenAI Bot
+  Future<ChatResponse> chatWithBot({
+    required String assessmentId,
+    required String message,
+  }) async {
+    final uri = Uri.parse('$baseUrl/chat/');
+    
+    final body = jsonEncode({
+      'assessment_id': assessmentId,
+      'message': message,
+    });
+    
+    try {
+      final response = await _client.post(
+        uri,
+        headers: {
+          ..._headers,
+          'Content-Type': 'application/json',
+        },
+        body: body,
+      );
+      
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body) as Map<String, dynamic>;
+        return ChatResponse.fromJson(json);
+      } else {
+        throw ApiException(
+          statusCode: response.statusCode,
+          message: 'Chat failed: ${response.body}',
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(
+        statusCode: 0,
+        message: 'Network error: $e',
+      );
+    }
+  }
+
   /// Health check
   Future<bool> healthCheck() async {
     try {

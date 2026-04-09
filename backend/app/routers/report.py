@@ -7,10 +7,13 @@ import uuid
 from datetime import datetime
 from typing import Optional, Dict, Any, List
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import JSONResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..config import settings
+from ..db.database import get_db
+from ..db.models import Assessment
 from ..schemas import (
     Detection,
     CostEstimationResponse,
@@ -158,7 +161,7 @@ def generate_assessment_summary(
 
 
 @router.post("/generate", response_model=ReportResponse)
-async def generate_report(request: ReportRequest):
+async def generate_report(request: ReportRequest, db: AsyncSession = Depends(get_db)):
     """
     Generate a comprehensive damage assessment report.
     
@@ -185,10 +188,10 @@ async def generate_report(request: ReportRequest):
         "vehicle_info": request.vehicle_info or {},
         "damage_analysis": {
             "total_detections": len(request.detections),
-            "detections": [det.dict() for det in request.detections],
+            "detections": [det.model_dump() for det in request.detections],
             "damage_summary": {}
         },
-        "assessment": summary.dict(),
+        "assessment": summary.model_dump(),
     }
     
     # Add damage summary
@@ -208,7 +211,18 @@ async def generate_report(request: ReportRequest):
     
     # Add cost info if provided
     if request.cost_estimation:
-        report_data["cost_estimation"] = request.cost_estimation.dict()
+        report_data["cost_estimation"] = request.cost_estimation.model_dump()
+        
+    # Save to database so chat can use it
+    assessment = Assessment(
+        id=report_id,
+        detections_json=[det.dict() for det in request.detections],
+        cost_estimation_json=request.cost_estimation.dict() if request.cost_estimation else {},
+        report_json=report_data,
+        chat_history=[]
+    )
+    db.add(assessment)
+    await db.commit()
     
     return ReportResponse(
         success=True,

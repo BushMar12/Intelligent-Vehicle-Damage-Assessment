@@ -3,11 +3,13 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 import '../models/damage_models.dart';
 import '../services/assessment_state.dart';
+import 'chat_screen.dart';
 
 class ResultsScreen extends StatelessWidget {
   const ResultsScreen({super.key});
@@ -15,16 +17,59 @@ class ResultsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AssessmentState>();
-    
+
+    void shareResults() {
+      if (!state.hasResults) return;
+      final buf = StringBuffer();
+      buf.writeln('Vehicle Damage Assessment Report');
+      buf.writeln('Generated: ${DateFormat('dd MMM yyyy - HH:mm').format(DateTime.now())}');
+      buf.writeln('');
+      if (state.report != null) {
+        buf.writeln('Severity: ${state.report!.assessmentSummary.overallSeverity.toUpperCase()}');
+        buf.writeln('');
+        buf.writeln('Summary:');
+        buf.writeln(state.report!.assessmentSummary.summaryText);
+        buf.writeln('');
+      }
+      if (state.hasDamages) {
+        buf.writeln('Damages detected (${state.damageCount}):');
+        for (final d in state.detectionResult!.detections) {
+          final conf = (d.confidence * 100).toStringAsFixed(0);
+          buf.writeln('  - ${d.className.replaceAll("_", " ")} (${d.severity ?? "unknown"} severity, ${conf}% confidence)');
+        }
+        buf.writeln('');
+      }
+      if (state.costEstimation != null) {
+        final cost = state.costEstimation!;
+        buf.writeln('Estimated Repair Cost (${cost.currency}):');
+        buf.writeln('  Subtotal: \$${cost.subtotal.toStringAsFixed(2)}');
+        buf.writeln('  GST (${(cost.taxRate * 100).toStringAsFixed(0)}%): \$${cost.taxAmount.toStringAsFixed(2)}');
+        buf.writeln('  TOTAL: \$${cost.totalCost.toStringAsFixed(2)}');
+      }
+      Clipboard.setData(ClipboardData(text: buf.toString()));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.white),
+              SizedBox(width: 8),
+              Text('Report copied to clipboard!'),
+            ],
+          ),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Assessment Results'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: () {
-              // TODO: Implement share functionality
-            },
+            icon: const Icon(Icons.copy_all),
+            tooltip: 'Copy report to clipboard',
+            onPressed: state.hasResults ? shareResults : null,
           ),
         ],
       ),
@@ -77,6 +122,23 @@ class ResultsScreen extends StatelessWidget {
           : const Center(
               child: Text('No results available'),
             ),
+      floatingActionButton: state.report != null
+          ? FloatingActionButton.extended(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => ChatScreen(
+                      assessmentId: state.report!.reportId,
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.chat_bubble_outline),
+              label: const Text('Ask AI'),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Colors.white,
+            )
+          : null,
     );
   }
 }

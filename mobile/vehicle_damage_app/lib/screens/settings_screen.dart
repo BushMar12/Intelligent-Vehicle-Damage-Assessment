@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
+import '../services/theme_provider.dart';
 import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -18,7 +19,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _returnAnnotatedImage = true;
   bool _includeLabor = true;
   String _currency = 'USD';
-  bool _isDarkMode = false;
 
   @override
   void initState() {
@@ -34,7 +34,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _returnAnnotatedImage = prefs.getBool('return_annotated') ?? true;
       _includeLabor = prefs.getBool('include_labor') ?? true;
       _currency = prefs.getString('currency') ?? 'USD';
-      _isDarkMode = prefs.getBool('dark_mode') ?? false;
     });
   }
 
@@ -45,7 +44,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await prefs.setBool('return_annotated', _returnAnnotatedImage);
     await prefs.setBool('include_labor', _includeLabor);
     await prefs.setString('currency', _currency);
-    await prefs.setBool('dark_mode', _isDarkMode);
     
     // Update API service base URL
     final api = context.read<ApiService>();
@@ -101,6 +99,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
@@ -242,11 +242,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: SwitchListTile(
               secondary: const Icon(Icons.dark_mode),
               title: const Text('Dark Mode'),
-              value: _isDarkMode,
+              value: themeProvider.isDarkMode,
               onChanged: (value) {
-                setState(() {
-                  _isDarkMode = value;
-                });
+                themeProvider.setDarkMode(value);
               },
             ),
           ),

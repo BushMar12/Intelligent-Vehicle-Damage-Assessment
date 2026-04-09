@@ -250,15 +250,35 @@ class ReportResponse {
   });
 
   factory ReportResponse.fromJson(Map<String, dynamic> json) {
-    return ReportResponse(
-      success: json['success'] as bool,
-      message: json['message'] as String,
-      reportId: json['report_id'] as String,
-      generatedAt: DateTime.parse(json['generated_at'] as String),
-      assessmentSummary: AssessmentSummary.fromJson(
+    DateTime parsedDate;
+    try {
+      parsedDate = DateTime.parse(json['generated_at'] as String);
+    } catch (_) {
+      parsedDate = DateTime.now();
+    }
+
+    AssessmentSummary parsedSummary;
+    try {
+      parsedSummary = AssessmentSummary.fromJson(
         json['assessment_summary'] as Map<String, dynamic>,
-      ),
-      damageCount: json['damage_count'] as int,
+      );
+    } catch (_) {
+      parsedSummary = AssessmentSummary(
+        overallSeverity: 'unknown',
+        primaryConcerns: [],
+        recommendedActions: [],
+        safetyNotes: [],
+        summaryText: 'Assessment complete.',
+      );
+    }
+
+    return ReportResponse(
+      success: json['success'] as bool? ?? true,
+      message: json['message'] as String? ?? '',
+      reportId: json['report_id'] as String? ?? '',
+      generatedAt: parsedDate,
+      assessmentSummary: parsedSummary,
+      damageCount: json['damage_count'] as int? ?? 0,
       totalCost: json['total_cost'] != null
           ? (json['total_cost'] as num).toDouble()
           : null,
@@ -343,4 +363,25 @@ class VideoDetectionResponse {
   
   /// Get number of frames analyzed
   int get framesAnalyzed => (videoInfo['frames_analyzed'] as int?) ?? 0;
+}
+
+/// Chat response from AI Assistant
+class ChatResponse {
+  final bool success;
+  final String response;
+  final String assessmentId;
+
+  ChatResponse({
+    required this.success,
+    required this.response,
+    required this.assessmentId,
+  });
+
+  factory ChatResponse.fromJson(Map<String, dynamic> json) {
+    return ChatResponse(
+      success: json['success'] as bool? ?? false,
+      response: json['response'] as String? ?? 'No response',
+      assessmentId: json['assessment_id'] as String? ?? '',
+    );
+  }
 }

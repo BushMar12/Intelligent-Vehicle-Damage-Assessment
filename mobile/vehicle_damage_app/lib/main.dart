@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import 'services/api_service.dart';
 import 'services/assessment_state.dart';
+import 'services/theme_provider.dart';
 import 'screens/home_screen.dart';
 import 'theme/app_theme.dart';
 
@@ -45,14 +46,22 @@ class VehicleDamageApp extends StatelessWidget {
         ChangeNotifierProvider<AssessmentState>(
           create: (_) => AssessmentState(),
         ),
+        // Theme Provider
+        ChangeNotifierProvider<ThemeProvider>(
+          create: (_) => ThemeProvider(),
+        ),
       ],
-      child: MaterialApp(
-        title: 'Vehicle Damage Assessment',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.system,
-        home: const HomeScreen(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            title: 'Vehicle Damage Assessment',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeProvider.themeMode,
+            home: const HomeScreen(),
+          );
+        },
       ),
     );
   }

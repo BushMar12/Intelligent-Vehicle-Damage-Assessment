@@ -15,6 +15,7 @@ from fastapi.staticfiles import StaticFiles
 
 from .config import settings, get_device
 from .routers import damage_router, cost_router, report_router
+from .routers.chat import router as chat_router
 from .schemas import HealthCheckResponse
 
 
@@ -42,6 +43,15 @@ async def lifespan(app: FastAPI):
         print("⚠ Model not found - will attempt to load on first request")
     except Exception as e:
         print(f"⚠ Model loading deferred: {e}")
+        
+    try:
+        from .db.database import engine
+        from .db.models import Base
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        print("✓ Database tables initialized")
+    except Exception as e:
+        print(f"⚠ Database initialization failed: {e}")
     
     print("=" * 60)
     print("API Ready!")
@@ -95,6 +105,7 @@ app.add_middleware(
 app.include_router(damage_router)
 app.include_router(cost_router)
 app.include_router(report_router)
+app.include_router(chat_router)
 
 
 # Root endpoint

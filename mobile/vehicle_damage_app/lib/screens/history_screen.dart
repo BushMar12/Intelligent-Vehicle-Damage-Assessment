@@ -1,7 +1,6 @@
 /// History Screen - View past assessments
 
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -116,9 +115,43 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         item: item,
                         onDelete: () => _deleteItem(item),
                         onTap: () {
-                          // TODO: Show detailed view
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Detailed view coming soon')),
+                          showDialog(
+                            context: context,
+                            builder: (_) => AlertDialog(
+                              title: Text(
+                                item.damageCount > 0
+                                    ? '${item.damageCount} Damage${item.damageCount != 1 ? 's' : ''} Detected'
+                                    : 'No Damage Detected',
+                              ),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Date: ${DateFormat('dd MMM yyyy – HH:mm').format(item.timestamp)}'),
+                                  const SizedBox(height: 8),
+                                  if (item.severity != null)
+                                    Text('Severity: ${item.severity!.toUpperCase()}',
+                                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                                  const SizedBox(height: 8),
+                                  if (item.damageTypes.isNotEmpty) ...[
+                                    const Text('Damage types:', style: TextStyle(fontWeight: FontWeight.bold)),
+                                    const SizedBox(height: 4),
+                                    ...item.damageTypes.map((t) => Text('  • ${t.replaceAll("_", " ")}'))
+                                  ],
+                                  if (item.totalCost != null) ...[
+                                    const SizedBox(height: 8),
+                                    Text('Est. Cost: \$${item.totalCost!.toStringAsFixed(2)} AUD',
+                                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                                  ],
+                                ],
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text('CLOSE'),
+                                ),
+                              ],
+                            ),
                           );
                         },
                       );
@@ -214,26 +247,19 @@ class _HistoryCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Thumbnail
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: item.thumbnailPath != null && File(item.thumbnailPath!).existsSync()
-                    ? Image.file(
-                        File(item.thumbnailPath!),
-                        width: 80,
-                        height: 80,
-                        fit: BoxFit.cover,
-                      )
-                    : Container(
-                        width: 80,
-                        height: 80,
-                        color: Colors.grey[200],
-                        child: Icon(
-                          Icons.image,
-                          color: Colors.grey[400],
-                          size: 32,
-                        ),
-                      ),
+              // Thumbnail - web-safe: no File() usage
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: _severityColor.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.directions_car,
+                  color: _severityColor,
+                  size: 36,
+                ),
               ),
               const SizedBox(width: 16),
               

@@ -34,25 +34,21 @@ class Settings(BaseSettings):
         "glass shatter", "lamp broken", "tire flat"
     ]
     
-    # Cost estimation base costs (AUD - Australian market rates)
-    COST_DENT: float = 350.0          # Panel beating/PDR: $200-500 AUD
-    COST_SCRATCH: float = 250.0       # Paint touch-up/respray: $150-400 AUD
-    COST_CRACK: float = 450.0         # Panel repair/replacement: $300-600 AUD
-    COST_GLASS_SHATTER: float = 650.0 # Windscreen replacement: $400-900 AUD
-    COST_LAMP_BROKEN: float = 400.0   # Headlight/taillight: $250-550 AUD
-    COST_TIRE_FLAT: float = 250.0     # Tire replacement: $150-350 AUD
-    
-    # Currency
-    CURRENCY: str = "AUD"
-    CURRENCY_SYMBOL: str = "$"
+    # Cost estimation base costs (USD)
+    COST_DENT: float = 200.0
+    COST_SCRATCH: float = 150.0
+    COST_CRACK: float = 300.0
+    COST_GLASS_SHATTER: float = 500.0
+    COST_LAMP_BROKEN: float = 250.0
+    COST_TIRE_FLAT: float = 150.0
     
     # Severity multipliers
     SEVERITY_SMALL: float = 1.0  # area < 5%
     SEVERITY_MEDIUM: float = 2.0  # 5% <= area < 15%
     SEVERITY_LARGE: float = 3.5  # area >= 15%
     
-    # Labor rate (AUD - Australian auto body shop rates)
-    LABOR_RATE_PER_HOUR: float = 120.0  # $100-140 AUD typical in Australia
+    # Labor rate
+    LABOR_RATE_PER_HOUR: float = 75.0
     
     # File upload settings
     MAX_FILE_SIZE: int = 10 * 1024 * 1024  # 10MB
@@ -61,6 +57,14 @@ class Settings(BaseSettings):
     # Paths
     UPLOAD_DIR: str = "uploads"
     OUTPUT_DIR: str = "outputs"
+    
+    # Database
+    DATABASE_URL: str = Field(default="postgresql+asyncpg://postgres:postgres@localhost:5432/vehicledamage")
+    
+    # GenAI (Defaults heavily to local Qwen via Ollama)
+    LLM_BASE_URL: str = Field(default="http://localhost:11434/v1")
+    LLM_API_KEY: str = Field(default="ollama")
+    LLM_MODEL: str = Field(default="qwen2.5")
     
     @property
     def base_costs(self) -> Dict[str, float]:

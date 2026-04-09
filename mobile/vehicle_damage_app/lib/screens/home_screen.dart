@@ -125,11 +125,23 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     final api = context.read<ApiService>();
     final state = context.read<AssessmentState>();
     
+    // Load settings
+    final prefs = await SharedPreferences.getInstance();
+    final confThreshold = prefs.getDouble('confidence_threshold') ?? 0.25;
+    final returnAnnotated = prefs.getBool('return_annotated') ?? true;
+    final includeLabor = prefs.getBool('include_labor') ?? true;
+    final currency = prefs.getString('currency') ?? 'AUD';
+    
     try {
       // Step 1: Detect damage
       state.setStatus(AssessmentStatus.analyzing, message: 'Analyzing image...');
       
-      final detectionResult = await api.detectDamageBytes(bytes: bytes, filename: filename);
+      final detectionResult = await api.detectDamageBytes(
+        bytes: bytes, 
+        filename: filename,
+        confThreshold: confThreshold,
+        returnAnnotated: returnAnnotated,
+      );
       state.setDetectionResult(detectionResult);
       
       if (detectionResult.numDetections > 0) {
@@ -138,9 +150,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         
         final costResult = await api.estimateCost(
           detections: detectionResult.detections,
-          currency: 'AUD',
+          includeLabor: includeLabor,
+          currency: currency,
         );
         state.setCostEstimation(costResult);
+        debugPrint('✓ Cost estimated: ${costResult.totalCost}');
         
         // Step 3: Generate report
         state.setStatus(AssessmentStatus.generatingReport, message: 'Generating report...');
@@ -149,9 +163,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           detections: detectionResult.detections,
           costEstimation: costResult,
         );
+        debugPrint('✓ Report generated: ${reportResult.reportId}');
         state.setReport(reportResult);
+        debugPrint('✓ state.report is now set: ${state.report?.reportId}');
       } else {
-        state.setStatus(AssessmentStatus.complete, message: 'No damage detected');
+        // No damage—still generate report so Ask AI is available
+        state.setStatus(AssessmentStatus.generatingReport, message: 'Generating report...');
+        final reportResult = await api.generateReport(
+          detections: [],
+        );
+        debugPrint('✓ No-damage report generated: ${reportResult.reportId}');
+        state.setReport(reportResult);
       }
       
       // Save to history
@@ -203,12 +225,19 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     final api = context.read<ApiService>();
     final state = context.read<AssessmentState>();
     
+    // Load settings
+    final prefs = await SharedPreferences.getInstance();
+    final confThreshold = prefs.getDouble('confidence_threshold') ?? 0.25;
+    final includeLabor = prefs.getBool('include_labor') ?? true;
+    final currency = prefs.getString('currency') ?? 'AUD';
+    
     try {
       state.setStatus(AssessmentStatus.analyzing, message: 'Processing video...');
       
       final videoResult = await api.detectDamageVideoBytes(
         bytes: bytes,
         filename: filename,
+        confThreshold: confThreshold,
         frameInterval: 30,
         maxFrames: 50,
       );
@@ -219,7 +248,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         
         final costResult = await api.estimateCost(
           detections: videoResult.aggregatedDetections,
-          currency: 'AUD',
+          includeLabor: includeLabor,
+          currency: currency,
         );
         
         state.setStatus(AssessmentStatus.complete, message: 'Analysis complete');
