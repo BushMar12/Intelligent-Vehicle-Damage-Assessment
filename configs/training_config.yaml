@@ -1,8 +1,8 @@
-# Training Configuration for Vehicle Damage Assessment
+# Training Configuration for Intelligent Vehicle Damage Assessment
 # =====================================================
 
 project:
-  name: "Vehicle-Damage-Assessment"
+  name: "Intelligent Vehicle Damage Assessment"
   description: "Deep learning-based vehicle damage detection and assessment"
   version: "1.0.0"
 
@@ -100,7 +100,7 @@ evaluation:
 
 # ClearML Configuration
 clearml:
-  project_name: "Vehicle-Damage-Assessment"
+  project_name: "Intelligent Vehicle Damage Assessment"
   task_name: "Model-Comparison"
   auto_connect_frameworks: true
   output_uri: null  # Will use default
