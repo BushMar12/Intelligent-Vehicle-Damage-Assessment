@@ -1,95 +1,165 @@
-# Vehicle Damage App
+# Vehicle Damage App — Flutter Frontend
 
-Flutter client for the Vehicle Damage Assessment system.
+Cross-platform Flutter client for the Intelligent Vehicle Damage Assessment system. Runs on **Web, iOS, macOS, and Android**.
 
-## Features
+---
 
-- Capture/select vehicle images
-- Upload videos for frame-based analysis
-- View detected damages with confidence and severity
-- Request AUD repair cost estimation
-- Generate assessment summaries
+## 📱 Screens
 
-## Requirements
+| Screen | Description |
+|--------|-------------|
+| **Home** | Upload image/video or take a photo. Shows live backend connection status. |
+| **Results** | Annotated damage image, severity badge, detected damages list, AUD cost breakdown, and recommended actions. |
+| **Ask AI** | Chat with a local Qwen LLM about your specific assessment. Full conversation history persisted to PostgreSQL. |
+| **History** | Browse past assessments with severity colour-coding, damage types, and cost summary. Tap for detailed view. |
+| **Settings** | Configure confidence threshold, currency, and backend URL. |
 
-- Flutter 3.x
-- Dart SDK compatible with the version in `pubspec.yaml`
-- Backend API running from `backend/`
+---
 
-## Development
+## 🚀 Quick Start
+
+### Prerequisites
+
+- [Flutter 3.x](https://flutter.dev/docs/get-started/install)
+- Backend API running on `http://127.0.0.1:8000` (see root `README.md`)
+
+### Run in browser (Chrome)
 
 ```bash
 flutter pub get
 flutter run -d chrome
 ```
 
-## Build Web
+### Build and serve as static web app
 
 ```bash
 flutter build web --release
 cd build/web
-python -m http.server 8080
+python3 -m http.server 8080
+# Open http://localhost:8080
 ```
 
-Open http://localhost:8080 after starting the local server.
+---
 
-## Backend API Base URL
+## 📡 Backend API URL
 
-Set the backend URL at build/run time with `--dart-define`:
-
-- Local backend default (simulator): `http://127.0.0.1:8000`
-- Physical device example: `http://192.168.1.50:8000`
-- Production example: `https://api.yourdomain.com`
-
-Examples:
+The app reads the backend URL from `--dart-define` at build/run time. Default is `http://127.0.0.1:8000`.
 
 ```bash
-flutter run -d ios --dart-define=API_BASE_URL=http://192.168.1.50:8000
-flutter build ipa --release --dart-define=API_BASE_URL=https://api.yourdomain.com
+# iOS Simulator (uses host machine's localhost)
+flutter run -d ios
+
+# Physical iPhone on same WiFi
+flutter run -d <device_id> --release \
+  --dart-define=API_BASE_URL=http://192.168.0.48:8000
+
+# Production build
+flutter build web --release \
+  --dart-define=API_BASE_URL=https://api.yourdomain.com
 ```
 
-## Deploy to iPhone
+---
 
-Important: iOS builds require macOS + Xcode. You cannot produce a signed iPhone IPA directly on Windows.
+## 🏗️ Project Structure
 
-### 1. Prepare on macOS
+```
+lib/
+├── main.dart                         # App entry point + providers
+├── models/
+│   └── damage_models.dart            # All Dart data classes
+├── screens/
+│   ├── home_screen.dart              # Upload / capture entry point
+│   ├── results_screen.dart           # Detection + cost results
+│   ├── chat_screen.dart              # AI assistant chat UI
+│   ├── history_screen.dart           # Past assessments viewer
+│   └── settings_screen.dart         # User preferences
+├── services/
+│   ├── api_service.dart              # All HTTP calls to FastAPI
+│   ├── assessment_state.dart         # ChangeNotifier state
+│   └── theme_provider.dart           # Dark/light mode toggle
+└── theme/                            # App colour scheme + typography
+```
+
+---
+
+## 🤖 AI Chat Feature
+
+After every analysis, an **"Ask AI"** button appears in the bottom-right corner of the Results screen. Tapping it opens a chat interface where you can ask questions about your specific assessment:
+
+- *"Is this windshield crack safe to drive with?"*
+- *"What's the cheapest way to fix the dents?"*
+- *"Should I claim this on insurance?"*
+
+The AI has full context of your detection results and cost estimates. All conversations are stored in PostgreSQL so history persists across sessions.
+
+> **Requires:** Ollama running locally with `ollama run qwen2.5`
+
+---
+
+## 🍎 iOS Deployment
+
+### Simulator (no code signing required)
 
 ```bash
-cd mobile/vehicle_damage_app
-flutter clean
-flutter pub get
-flutter doctor
+flutter clean && flutter pub get
+cd ios && rm -rf Pods Podfile.lock && pod install && cd ..
+flutter run -d "iPhone 17 Pro"
 ```
 
-### 2. Configure iOS signing in Xcode
+### Physical Device
 
-1. Open `ios/Runner.xcworkspace` in Xcode.
-2. Select Runner target -> Signing & Capabilities.
-3. Choose your Apple Developer Team.
-4. Replace bundle identifier `com.example.vehicleDamageApp` with your own unique ID.
-5. Connect your iPhone, trust developer cert, and enable Developer Mode on device.
-
-### 3. Run on physical iPhone (development)
+1. Open `ios/Runner.xcworkspace` in Xcode
+2. **Runner target** → **Signing & Capabilities** → select your Team
+3. Change Bundle ID to something unique (e.g. `com.yourname.vehicleDamageApp`)
+4. Enable **Developer Mode** on iPhone: Settings → Privacy & Security → Developer Mode
+5. Connect iPhone and run:
 
 ```bash
-flutter devices
-flutter run -d <iphone_device_id> --dart-define=API_BASE_URL=http://<your-lan-ip>:8000
+flutter run -d <device_id> --release \
+  --dart-define=API_BASE_URL=http://<mac-lan-ip>:8000
 ```
 
-### 4. Build for TestFlight / App Store
+> **Tip:** If your project is in OneDrive/cloud storage, copy it to a local folder first to avoid code signing issues with extended attributes:
+> ```bash
+> rsync -av --exclude='build' --exclude='Pods' . /tmp/vehicle_damage_app/
+> cd /tmp/vehicle_damage_app && xattr -rc .
+> ```
 
-1. Update app version in `pubspec.yaml` (`version: x.y.z+build`).
-2. Build archive from Flutter:
+### TestFlight / App Store
 
 ```bash
-flutter build ipa --release --dart-define=API_BASE_URL=https://api.yourdomain.com
+flutter build ipa --release \
+  --dart-define=API_BASE_URL=https://api.yourdomain.com
+```
+Then upload the `.ipa` via Xcode Organizer → App Store Connect.
+
+---
+
+## 🔧 Troubleshooting
+
+**iOS Simulator can't reach the backend:**
+- Ensure backend binds to `0.0.0.0:8000`, not `127.0.0.1`
+- Simulator routes `127.0.0.1` to the host Mac — this is correct behaviour
+
+**Physical device can't reach the backend:**
+- Use your Mac's LAN IP: `ipconfig getifaddr en0`
+- Both Mac and iPhone must be on the same WiFi
+- Check macOS Firewall: System Settings → Network → Firewall
+
+**"Ask AI" button not appearing:**
+- The button shows only after the Report is generated
+- Check the browser console for errors (`Cmd+Option+J`)
+- Ensure PostgreSQL and the FastAPI backend are running
+
+**CocoaPods issues:**
+```bash
+sudo gem install cocoapods
+cd ios && pod repo update && pod install
 ```
 
-3. In Xcode Organizer, upload the archive to App Store Connect.
-4. In App Store Connect -> TestFlight, add internal/external testers.
+---
 
-### 5. Production backend requirements
+## 📄 Related
 
-- Prefer HTTPS backend for App Store release.
-- If you use a local/LAN HTTP backend for development, keep that for debug/testing only.
-- Ensure backend CORS and firewall allow requests from iPhone network.
+- [Root README](../../README.md) — Full system setup including backend, database, and Ollama
+- [Backend API Docs](http://localhost:8000/docs) — Interactive Swagger UI (when backend is running)

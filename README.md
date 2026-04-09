@@ -1,54 +1,109 @@
-# Intelligent Vehicle Damage Assessment Using Deep Learning
+# 🚗 Intelligent Vehicle Damage Assessment System
 
-An end-to-end deep learning system for automatic vehicle damage detection and assessment, featuring model comparison, cost estimation in AUD, and web/mobile deployment.
+> An end-to-end AI-powered system for automatic vehicle damage detection, repair cost estimation, and interactive AI consultation — built with deep learning, FastAPI, PostgreSQL, and Flutter.
 
-## Overview
+[![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.110-009688?logo=fastapi)](https://fastapi.tiangolo.com)
+[![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter)](https://flutter.dev)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql)](https://postgresql.org)
+[![License](https://img.shields.io/badge/License-Academic-lightgrey)](./LICENSE)
 
-This project implements a complete vehicle damage assessment pipeline that:
-- Detects 6 types of vehicle damage using state-of-the-art object detection models
-- Supports both **images and videos** for damage detection
-- Compares YOLO11m, YOLOv8m, Faster R-CNN, and RT-DETR
-- Provides repair cost estimation in **AUD** (Australian market rates) with 10% GST
-- Generates AI-powered assessment reports
-- Deploys as a Flutter web/mobile application with FastAPI backend
+---
 
-## Project Structure
+## ✨ Features
+
+| Feature | Description |
+|---|---|
+| 🔍 **AI Damage Detection** | Detects 6 types of vehicle damage from images and videos |
+| 💬 **AI Chat Assistant** | Chat with a local Qwen LLM about your specific assessment |
+| 💰 **Cost Estimation (AUD)** | Itemised repair quote with labour, parts, and 10% GST |
+| 📊 **Model Comparison** | Benchmarks YOLO11m, YOLOv8m, Faster R-CNN, and RT-DETR |
+| 📋 **Report Copy** | One-tap clipboard export of full assessment report |
+| 🗄️ **Persistent Database** | All assessments and chat histories saved to PostgreSQL |
+| 📱 **Cross-platform UI** | Flutter app runs on Web, iOS, macOS, and Android |
+| 🕐 **Assessment History** | Browse past assessments with severity and cost summary |
+
+---
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                     Flutter Frontend                     │
+│   (Web / iOS / macOS / Android)                        │
+│                                                         │
+│  Home ──► Results ──► Ask AI (Chat)                    │
+│   │           │            │                            │
+│   │     Copy Report    Chat History                     │
+│   └───── History Screen ───┘                           │
+└───────────────────┬─────────────────────────────────────┘
+                    │ HTTP / REST
+┌───────────────────▼─────────────────────────────────────┐
+│                  FastAPI Backend                         │
+│                                                         │
+│  /damage/predict    →  YOLO11m / YOLOv8m Inference     │
+│  /cost/predict      →  AUD Cost Estimation              │
+│  /report/generate   →  Assessment Report + DB Save      │
+│  /chat/             →  Qwen LLM via Ollama              │
+└──────────┬──────────────────────┬───────────────────────┘
+           │                      │
+┌──────────▼──────┐    ┌──────────▼──────────────────────┐
+│   PostgreSQL    │    │   Ollama (local)                │
+│   Assessments  │    │   Qwen 2.5 LLM                  │
+│   Chat History │    │   http://localhost:11434         │
+└─────────────────┘    └──────────────────────────────────┘
+```
+
+---
+
+## 🗂️ Project Structure
 
 ```
 vehicle_damage_assessment/
-├── notebooks/
-│   └── model_comparison.ipynb      # Training & evaluation notebook
 ├── backend/
 │   ├── app/
-│   │   ├── main.py                 # FastAPI application
-│   │   ├── config.py               # Configuration (AUD pricing)
-│   │   ├── models/                 # Model inference wrappers
-│   │   ├── routers/                # API endpoints
-│   │   │   ├── damage.py           # Image & video detection
-│   │   │   ├── cost.py             # Cost estimation
-│   │   │   └── report.py           # Report generation
-│   │   ├── schemas/                # Pydantic models
-│   │   └── utils/                  # Utility functions
-│   ├── .env                        # Environment configuration
-│   ├── requirements.txt
+│   │   ├── main.py                # FastAPI entry point
+│   │   ├── config.py              # Settings (loaded from .env)
+│   │   ├── db/
+│   │   │   ├── database.py        # Async SQLAlchemy engine
+│   │   │   └── models.py          # Assessment + chat history table
+│   │   ├── models/                # ML model inference wrappers
+│   │   ├── routers/
+│   │   │   ├── damage.py          # Image & video detection endpoints
+│   │   │   ├── cost.py            # AUD cost estimation endpoint
+│   │   │   ├── report.py          # Report generation + DB save
+│   │   │   └── chat.py            # Qwen AI chat endpoint
+│   │   ├── schemas/               # Pydantic request/response models
+│   │   └── utils/                 # Utility functions
+│   ├── .env                       # Environment configuration (not in git)
+│   ├── requirements.txt           # Production dependencies only
 │   └── Dockerfile
 ├── mobile/
-│   └── vehicle_damage_app/         # Flutter web/mobile application
-│       ├── lib/
-│       │   ├── screens/            # UI screens
-│       │   ├── services/           # API services
-│       │   ├── models/             # Data models
-│       │   └── theme/              # App theming
-├── data/
-│   └── CarDD/                      # CarDD Dataset
-├── models/                         # Trained model weights
-│   ├── yolov8m_best.pt            # YOLOv8m trained weights
-│   └── yolo11m_best.pt            # YOLO11m trained weights
-└── configs/
-    └── training_config.yaml        # Training configuration
+│   └── vehicle_damage_app/        # Flutter cross-platform app
+│       └── lib/
+│           ├── screens/
+│           │   ├── home_screen.dart
+│           │   ├── results_screen.dart
+│           │   ├── chat_screen.dart      # AI conversation UI
+│           │   ├── history_screen.dart
+│           │   └── settings_screen.dart
+│           ├── services/
+│           │   ├── api_service.dart      # All HTTP calls
+│           │   └── assessment_state.dart # App state management
+│           └── models/
+│               └── damage_models.dart    # Dart data classes
+├── notebooks/
+│   ├── model_comparison.ipynb     # Training & evaluation
+│   └── requirements.txt           # Training-only dependencies
+├── models/                        # Trained .pt weight files
+├── configs/
+│   └── training_config.yaml
+└── README.md
 ```
 
-## Damage Categories
+---
+
+## 🔬 Damage Categories
 
 | ID | Category | Description | Base Cost (AUD) |
 |----|----------|-------------|-----------------|
@@ -59,383 +114,220 @@ vehicle_damage_assessment/
 | 4 | Lamp Broken | Headlight/taillight damage | $400 |
 | 5 | Tire Flat | Tire damage/deflation | $250 |
 
-*Costs are multiplied by severity (small: 1x, medium: 2x, large: 3.5x) plus labor and parts*
+> Costs are multiplied by severity (small: 1×, medium: 2×, large: 3.5×), plus $120/hr labour and 10% GST.
 
-## Installation
+---
+
+## 🤖 Model Comparison
+
+| Model | Architecture | Size | Notes |
+|-------|-------------|------|-------|
+| **YOLO11m** | YOLO v11 Medium | 41 MB | Best accuracy — recommended |
+| **YOLOv8m** | YOLO v8 Medium | 52 MB | Balanced speed/accuracy |
+| **Faster R-CNN** | ResNet50-FPN v2 | Large | Two-stage baseline |
+| **RT-DETR** | Transformer detector | Large | End-to-end transformer |
+
+---
+
+## ⚙️ Setup & Installation
 
 ### Prerequisites
-- Python 3.9+
-- CUDA 11.8+ (for NVIDIA GPU) or Apple Silicon Mac (for MPS)
-- Flutter 3.x (for web/mobile development)
 
-### Backend Setup
+| Tool | Version | Purpose |
+|------|---------|---------|
+| Python | 3.12+ | Backend |
+| Flutter | 3.x | Frontend |
+| Docker Desktop | Latest | PostgreSQL database |
+| Ollama | Latest | Local Qwen AI |
+
+---
+
+### 1. Clone the Repository
 
 ```bash
-cd backend
-
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
+git clone https://github.com/BushMar12/Intelligent-Vehicle-Damage-Assessment.git
+cd Intelligent-Vehicle-Damage-Assessment
 ```
 
-### Configure Model Path
+### 2. Configure Environment
 
-Edit `backend/.env`:
+Copy and edit the backend config:
+```bash
+cd backend
+```
+
+Edit `.env` with your settings:
 ```env
-MODEL_PATH=../models/yolov8m_best.pt
-MODEL_TYPE=yolov8
+# Model
+MODEL_PATH=../models/yolo11m_best.pt
+MODEL_TYPE=yolo11
 CONF_THRESHOLD=0.25
 IOU_THRESHOLD=0.45
+
+# PostgreSQL (Docker)
+DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/vehicledamage
+
+# Qwen AI (Ollama)
+LLM_BASE_URL=http://localhost:11434/v1
+LLM_API_KEY=ollama
+LLM_MODEL=qwen2.5
 ```
 
-### Run Backend Server
+### 3. Start PostgreSQL
+
+Make sure Docker Desktop is open, then:
+```bash
+docker run --name vehicle_db \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=vehicledamage \
+  -p 5432:5432 -d postgres
+```
+
+> Next time after restart: `docker start vehicle_db`
+
+### 4. Start the Qwen AI Model
+
+Download and install [Ollama](https://ollama.com), then:
+```bash
+ollama run qwen2.5
+```
+Leave this terminal open — it serves the local AI on port `11434`.
+
+### 5. Start the Backend
 
 ```bash
 cd backend
-source venv/bin/activate
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-Backend API docs: http://localhost:8000/docs
+Watch the startup log — you should see:
+```
+✓ Model pre-loaded successfully
+✓ Database tables initialized
+API Ready!
+```
 
-### Flutter App Setup
+API docs available at: **http://localhost:8000/docs**
 
-#### Web App
+### 6. Start the Frontend
 
+**Web (quickest):**
 ```bash
 cd mobile/vehicle_damage_app
-
-# Install dependencies
 flutter pub get
-
-# Build for web
 flutter build web --release
-
-# Serve the web app
-cd build/web
-python3 -m http.server 8080
+cd build/web && python3 -m http.server 8080
 ```
+Open **http://localhost:8080**
 
-Web app: http://localhost:8080
-
-#### iOS App (macOS only)
-
-**Prerequisites:**
-- macOS with Xcode installed
-- CocoaPods (`sudo gem install cocoapods`)
-- Apple Developer account (for physical device deployment)
-
-**Build for iOS Simulator (No Code Signing):**
-
+**iOS Simulator:**
 ```bash
 cd mobile/vehicle_damage_app
-
-# Clean and install dependencies
-flutter clean
-flutter pub get
-
-# Install iOS CocoaPods (clean install recommended)
-cd ios && rm -rf Pods Podfile.lock && pod install && cd ..
-
-# Build with xcodebuild (no code signing required for simulator)
-cd ios
-xcodebuild -workspace Runner.xcworkspace -scheme Runner \
-  -destination 'platform=iOS Simulator,name=iPhone 17' \
-  -configuration Debug CODE_SIGNING_ALLOWED=NO clean build
-
-# Install and launch on simulator
-xcrun simctl install "iPhone 17" \
-  ~/Library/Developer/Xcode/DerivedData/Runner-*/Build/Products/Debug-iphonesimulator/Runner.app
-xcrun simctl launch "iPhone 17" com.example.vehicleDamageApp
-open -a Simulator
-```
-
-**Alternative (requires code signing setup):**
-```bash
 flutter run -d ios
 ```
 
-**For Physical Device Deployment:**
-
-1. Open `ios/Runner.xcworkspace` in Xcode
-2. Select **Runner** target → **Signing & Capabilities**
-3. Enable **"Automatically manage signing"**
-4. Select your **Team** (Apple Developer account)
-5. Update **Bundle Identifier** to a unique ID (e.g., `com.yourname.vehicleDamageApp`)
-6. Connect your iPhone and run:
-
+**Physical iPhone (must be on same WiFi):**
 ```bash
-flutter run -d <device_id> --dart-define=API_BASE_URL=http://<your-lan-ip>:8000
+flutter run -d <device_id> --release \
+  --dart-define=API_BASE_URL=http://<your-mac-ip>:8000
 ```
 
-**Build for TestFlight/App Store:**
+---
 
-```bash
-flutter build ipa --release --dart-define=API_BASE_URL=https://api.yourdomain.com
-```
+## 🌐 API Reference
 
-Then upload via Xcode Organizer to App Store Connect.
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `GET /health` | GET | Service health + model status |
+| `/damage/predict` | POST | Detect damage from image file |
+| `/damage/predict/video` | POST | Detect damage from video frames |
+| `/cost/predict` | POST | Estimate AUD repair costs |
+| `/report/generate` | POST | Generate report + save to database |
+| `/chat/` | POST | Chat with Qwen AI about assessment |
 
-## Model Comparison
-
-The notebook trains and evaluates four models:
-
-| Model | Architecture | Size | Best For |
-|-------|-------------|------|----------|
-| YOLO11m | YOLO v11 Medium | 41MB | Latest improvements |
-| YOLOv8m | YOLO v8 Medium | 52MB | Balanced speed/accuracy |
-| Faster R-CNN | ResNet50-FPN v2 | Larger | Strong two-stage baseline |
-| RT-DETR | Transformer detector | Larger | End-to-end transformer baseline |
-
-## API Endpoints
-
-### Image Detection: `POST /damage/predict`
-
+**Example — Detect damage:**
 ```bash
 curl -X POST "http://localhost:8000/damage/predict" \
   -F "file=@damaged_car.jpg"
 ```
 
-### Video Detection: `POST /damage/predict/video`
-
+**Example — Chat with AI:**
 ```bash
-curl -X POST "http://localhost:8000/damage/predict/video?frame_interval=30&max_frames=50" \
-  -F "file=@damage_video.mp4"
+curl -X POST "http://localhost:8000/chat/" \
+  -H "Content-Type: application/json" \
+  -d '{"assessment_id": "ABC12345", "message": "Is the crack in the windshield dangerous?"}'
 ```
 
-**Parameters:**
-- `frame_interval`: Process every Nth frame (default: 30)
-- `max_frames`: Maximum frames to analyze (default: 50)
+---
 
-### Cost Estimation: `POST /cost/predict`
+## 🗄️ Database
 
-Returns itemized cost breakdown with:
-- Base repair cost per damage type
-- Labor costs ($120/hour AUD)
-- Parts costs
-- GST (10%)
-- Estimate range (±20%)
+Assessments and chat conversations are persisted to PostgreSQL automatically.
 
-### Report Generation: `POST /report/generate`
+### View the database (GUI)
 
-Generates AI-powered assessment report with:
-- Overall severity rating
-- Primary concerns
-- Recommended actions
-- Safety notes
+Use **[TablePlus](https://tableplus.com/)** (free) with these settings:
+- **Host:** `localhost` | **Port:** `5432`
+- **User:** `postgres` | **Password:** `postgres`
+- **Database:** `vehicledamage`
 
-## Cost Estimation (AUD)
+### `assessments` Table Schema
 
-| Component | Rate |
-|-----------|------|
-| Labor | $120/hour |
-| GST | 10% |
-| Severity Multiplier (Small) | 1.0x |
-| Severity Multiplier (Medium) | 2.0x |
-| Severity Multiplier (Large) | 3.5x |
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | String (UUID) | Report ID |
+| `created_at` | DateTime | Timestamp |
+| `detections_json` | JSON | ML detection results |
+| `cost_estimation_json` | JSON | AUD cost breakdown |
+| `report_json` | JSON | Full assessment report |
+| `chat_history` | JSON | Conversation history with Qwen |
 
-## App Features
+---
 
-- 📷 **Camera capture** for real-time damage assessment
-- 🖼️ **Gallery upload** for existing images
-- 🎥 **Video upload** for comprehensive vehicle scan
-- 🔍 **Damage visualization** with annotated bounding boxes
-- 💵 **Cost estimation** in AUD with GST breakdown
-- 📊 **Key frame viewer** for video analysis results
-- 📄 **Assessment reports** with severity ratings
+## 🛠️ Technologies
 
-### Supported Platforms
+| Layer | Technology |
+|-------|-----------|
+| **Deep Learning** | PyTorch, Ultralytics YOLO |
+| **Backend API** | FastAPI, Uvicorn, Pydantic v2 |
+| **Database** | PostgreSQL, SQLAlchemy 2.0 (async), asyncpg |
+| **AI Chat** | Qwen 2.5 via Ollama (OpenAI-compatible API) |
+| **Frontend** | Flutter 3, Dart |
+| **Image Processing** | OpenCV, Pillow |
+| **Device Support** | CUDA (NVIDIA), Apple MPS, CPU |
+
+---
+
+## 📱 Platform Support
 
 | Platform | Status | Notes |
 |----------|--------|-------|
 | Web | ✅ Supported | Chrome, Firefox, Safari, Edge |
-| iOS | ✅ Supported | Requires macOS + Xcode for building |
+| iOS | ✅ Supported | macOS + Xcode required to build |
 | macOS | ✅ Supported | Native desktop app |
 | Android | 🔧 Configured | Requires Android Studio setup |
 
-## Quick Start
+---
 
-### Option 1: Web App (Quickest)
+## 🎓 Academic Context
 
-```bash
-# Terminal 1: Start backend
-cd backend && source venv/bin/activate
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+This project was developed as **Assignment 3** for the UTS Master's subject:
+> **42028 — Deep Learning and Convolutional Neural Networks**
 
-# Terminal 2: Serve frontend
-cd mobile/vehicle_damage_app/build/web
-python3 -m http.server 8080
-```
+It demonstrates a complete, production-aware ML pipeline from model training and evaluation through to full-stack web/mobile deployment with a persistent backend and generative AI integration.
 
-Then open http://localhost:8080 in your browser.
+---
 
-### Option 2: iOS Simulator (macOS)
+## 📄 License
 
-```bash
-# Terminal 1: Start backend
-cd backend && source venv/bin/activate
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+For educational purposes as part of the UTS Master's program.
 
-# Terminal 2: Build and run iOS app
-cd mobile/vehicle_damage_app
-flutter clean
-flutter pub get
-cd ios && rm -rf Pods Podfile.lock && pod install && cd ..
+## Acknowledgements
 
-# Build for simulator (no code signing required)
-cd ios
-xcodebuild -workspace Runner.xcworkspace -scheme Runner \
-  -destination 'platform=iOS Simulator,name=iPhone 17' \
-  -configuration Debug CODE_SIGNING_ALLOWED=NO clean build
-
-# Install and launch on simulator
-xcrun simctl install "iPhone 17" \
-  ~/Library/Developer/Xcode/DerivedData/Runner-*/Build/Products/Debug-iphonesimulator/Runner.app
-xcrun simctl launch "iPhone 17" com.example.vehicleDamageApp
-open -a Simulator
-```
-
-**Alternative (if code signing is configured):**
-```bash
-cd mobile/vehicle_damage_app
-flutter run -d ios
-```
-
-### Option 3: Physical iPhone
-
-**Prerequisites:**
-- Code signing configured in Xcode (see iOS App Setup above)
-- iPhone and Mac on the same WiFi network
-- Developer Mode enabled on iPhone (Settings → Privacy & Security → Developer Mode)
-
-```bash
-# Step 1: Get your Mac's LAN IP
-ipconfig getifaddr en0
-# Example output: 192.168.0.48
-
-# Step 2: Start backend (accessible on network)
-cd backend && source venv/bin/activate
-uvicorn app.main:app --host 0.0.0.0 --port 8000
-
-# Step 3: List connected devices
-flutter devices
-# Find your iPhone's device ID (e.g., 00008120-XXXX)
-
-# Step 4: Build and run on iPhone (RELEASE mode required for home screen launch)
-cd mobile/vehicle_damage_app
-flutter run -d <device_id> --release --dart-define=API_BASE_URL=http://<lan-ip>:8000
-
-# Example:
-flutter run -d 00008120-0019450201B9A01E --release --dart-define=API_BASE_URL=http://192.168.0.48:8000
-```
-
-**Important Notes:**
-- Use `--release` mode to launch from home screen (debug mode only works via Xcode/Flutter)
-- First launch requires trusting the developer certificate: Settings → General → VPN & Device Management → Trust
-- If project is in OneDrive/cloud storage, copy to local folder first to avoid code signing issues:
-  ```bash
-  rsync -av --exclude='build' --exclude='Pods' mobile/vehicle_damage_app /tmp/
-  cd /tmp/vehicle_damage_app
-  flutter run -d <device_id> --release --dart-define=API_BASE_URL=http://<lan-ip>:8000
-  ```
-
-## Configuration
-
-### Environment Variables (`backend/.env`)
-
-```env
-MODEL_PATH=../models/yolov8m_best.pt
-MODEL_TYPE=yolov8          # yolo, yolov8, yolo11, faster_rcnn, rtdetr
-CONF_THRESHOLD=0.25
-IOU_THRESHOLD=0.45
-```
-
-### Switch Models
-
-```bash
-# Use YOLOv8
-MODEL_PATH=../models/yolov8m_best.pt
-MODEL_TYPE=yolov8
-
-# Use YOLO11
-MODEL_PATH=../models/yolo11m_best.pt
-MODEL_TYPE=yolo11
-
-# Use RT-DETR
-MODEL_PATH=../models/rtdetr_best.pt
-MODEL_TYPE=rtdetr
-```
-
-## Troubleshooting
-
-### iOS Build Issues
-
-**Code signing errors on simulator:**
-```bash
-# Use xcodebuild with CODE_SIGNING_ALLOWED=NO instead of flutter run
-cd ios
-xcodebuild -workspace Runner.xcworkspace -scheme Runner \
-  -destination 'platform=iOS Simulator,name=iPhone 17' \
-  -configuration Debug CODE_SIGNING_ALLOWED=NO clean build
-```
-
-**Stale build files:**
-```bash
-cd mobile/vehicle_damage_app
-flutter clean
-cd ios && rm -rf Pods Podfile.lock && pod install && cd ..
-```
-
-**CocoaPods issues:**
-```bash
-sudo gem install cocoapods
-cd ios && pod repo update && pod install
-```
-
-### Backend Connection Issues
-
-**iOS Simulator can't reach localhost:**
-- Ensure backend is running on `0.0.0.0:8000` (not `127.0.0.1`)
-- iOS Simulator uses `127.0.0.1` to reach host machine
-
-**Physical device can't reach backend:**
-- Use your Mac's LAN IP (e.g., `192.168.0.48`)
-- Ensure both iPhone and Mac are on the same WiFi network
-- Check firewall: `/usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate`
-- Verify server is accessible: `curl http://<lan-ip>:8000/health`
-- Test from iPhone Safari: open `http://<lan-ip>:8000/health`
-
-**Resource fork errors (OneDrive/cloud storage):**
-```bash
-# Copy project to local folder to avoid code signing issues
-rsync -av --exclude='build' --exclude='Pods' --exclude='.dart_tool' mobile/vehicle_damage_app /tmp/
-cd /tmp/vehicle_damage_app
-xattr -rc .  # Remove extended attributes
-flutter pub get && cd ios && pod install && cd ..
-flutter run -d <device_id> --release --dart-define=API_BASE_URL=http://<lan-ip>:8000
-```
-
-**Debug vs Release mode on physical iPhone:**
-- Debug builds can only be launched from Xcode/Flutter tooling
-- Use `--release` flag to build apps that launch from home screen
-
-## Technologies Used
-
-- **Deep Learning**: PyTorch, Ultralytics YOLO
-- **Backend**: FastAPI, Uvicorn, Pydantic
-- **Frontend**: Flutter, Dart
-- **Computer Vision**: OpenCV, PIL
-- **Device Support**: CUDA, Apple MPS, CPU
-
-## License
-
-This project is for educational purposes as part of the UTS Master's program in Deep Learning and Convolutional Neural Networks (42028).
-
-## Acknowledgments
-
-- CarDD Dataset for vehicle damage images
-- Ultralytics for YOLO implementations
+- [CarDD Dataset](https://github.com/CarDD-USTC/CarDD-USTC.github.io) — vehicle damage training images
+- [Ultralytics](https://ultralytics.com) — YOLO implementations
+- [Ollama](https://ollama.com) — local LLM serving
 - UTS Faculty of Engineering and IT
