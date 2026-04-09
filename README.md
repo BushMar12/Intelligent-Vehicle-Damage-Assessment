@@ -1,4 +1,4 @@
-# 🚗 Intelligent Vehicle Damage Assessment System
+# Intelligent Vehicle Damage Assessment System
 
 > An end-to-end AI-powered system for automatic vehicle damage detection, repair cost estimation, and interactive AI consultation — built with deep learning, FastAPI, PostgreSQL, and Flutter.
 
@@ -10,22 +10,22 @@
 
 ---
 
-## ✨ Features
+## Features
 
 | Feature | Description |
 |---|---|
-| 🔍 **AI Damage Detection** | Detects 6 types of vehicle damage from images and videos |
-| 💬 **AI Chat Assistant** | Chat with a local Qwen LLM about your specific assessment |
-| 💰 **Cost Estimation (AUD)** | Itemised repair quote with labour, parts, and 10% GST |
-| 📊 **Model Comparison** | Benchmarks YOLO11m, YOLOv8m, Faster R-CNN, and RT-DETR |
-| 📋 **Report Copy** | One-tap clipboard export of full assessment report |
-| 🗄️ **Persistent Database** | All assessments and chat histories saved to PostgreSQL |
-| 📱 **Cross-platform UI** | Flutter app runs on Web, iOS, macOS, and Android |
-| 🕐 **Assessment History** | Browse past assessments with severity and cost summary |
+| **AI Damage Detection** | Detects 6 types of vehicle damage from images and videos |
+| **AI Chat Assistant** | Chat with a local Qwen LLM about your specific assessment |
+| **Cost Estimation (AUD)** | Itemised repair quote with labour, parts, and 10% GST |
+| **Model Comparison** | Benchmarks YOLO11m, YOLOv8m, Faster R-CNN, and RT-DETR |
+| **Report Copy** | One-tap clipboard export of full assessment report |
+| **Persistent Database** | All assessments and chat histories saved to PostgreSQL |
+| **Cross-platform UI** | Flutter app runs on Web, iOS, macOS, and Android |
+| **Assessment History** | Browse past assessments with severity and cost summary |
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -56,7 +56,7 @@
 
 ---
 
-## 🗂️ Project Structure
+## Project Structure
 
 ```
 vehicle_damage_assessment/
@@ -103,7 +103,7 @@ vehicle_damage_assessment/
 
 ---
 
-## 🔬 Damage Categories
+## Damage Categories
 
 | ID | Category | Description | Base Cost (AUD) |
 |----|----------|-------------|-----------------|
@@ -118,7 +118,7 @@ vehicle_damage_assessment/
 
 ---
 
-## 🤖 Model Comparison
+## Model Comparison
 
 | Model | Architecture | Size | Notes |
 |-------|-------------|------|-------|
@@ -129,7 +129,7 @@ vehicle_damage_assessment/
 
 ---
 
-## ⚙️ Setup & Installation
+## Setup & Installation
 
 ### Prerequisites
 
@@ -237,7 +237,7 @@ flutter run -d <device_id> --release \
 
 ---
 
-## 🌐 API Reference
+## API Reference
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
@@ -263,7 +263,7 @@ curl -X POST "http://localhost:8000/chat/" \
 
 ---
 
-## 🗄️ Database
+## Database
 
 Assessments and chat conversations are persisted to PostgreSQL automatically.
 
@@ -284,6 +284,8 @@ Use **[TablePlus](https://tableplus.com/)** (free) with these settings:
 | `cost_estimation_json` | JSON | AUD cost breakdown |
 | `report_json` | JSON | Full assessment report |
 | `chat_history` | JSON | Conversation history with Qwen |
+
+---
 
 ### View the database (Docker CLI)
 
@@ -324,7 +326,7 @@ ORDER BY created_at DESC;
 
 ---
 
-## 🛠️ Technologies
+## Technologies
 
 | Layer | Technology |
 |-------|-----------|
@@ -338,7 +340,7 @@ ORDER BY created_at DESC;
 
 ---
 
-## 📱 Platform Support
+## Platform Support
 
 | Platform | Status | Notes |
 |----------|--------|-------|
@@ -349,7 +351,7 @@ ORDER BY created_at DESC;
 
 ---
 
-## 🎓 Academic Context
+## Academic Context
 
 This project was developed as **Assignment 3** for the UTS Master's subject:
 > **42028 — Deep Learning and Convolutional Neural Networks**
