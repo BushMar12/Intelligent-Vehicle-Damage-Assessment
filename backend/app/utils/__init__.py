@@ -153,9 +153,9 @@ def draw_detections(
             'dent': (255, 0, 0),
             'scratch': (0, 255, 0),
             'crack': (0, 0, 255),
-            'glass_shatter': (255, 255, 0),
-            'lamp_broken': (255, 0, 255),
-            'tire_flat': (0, 255, 255),
+            'glass shatter': (255, 255, 0),
+            'lamp broken': (255, 0, 255),
+            'tire flat': (0, 255, 255),
         }
     
     annotated = image.copy()

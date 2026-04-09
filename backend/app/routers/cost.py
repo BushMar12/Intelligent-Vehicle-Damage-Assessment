@@ -28,9 +28,9 @@ def calculate_labor_hours(damage_type: str, severity: str) -> float:
         "dent": 2.0,
         "scratch": 1.5,
         "crack": 3.0,
-        "glass_shatter": 2.5,
-        "lamp_broken": 1.5,
-        "tire_flat": 0.5,
+        "glass shatter": 2.5,
+        "lamp broken": 1.5,
+        "tire flat": 0.5,
     }
     
     severity_multipliers = {
@@ -52,9 +52,9 @@ def calculate_parts_cost(damage_type: str, severity: str) -> float:
         "dent": 80.0,       # Paint, filler, materials
         "scratch": 50.0,    # Touch-up paint, clear coat
         "crack": 150.0,     # Filler, structural materials
-        "glass_shatter": 450.0,  # Replacement windscreen/glass
-        "lamp_broken": 220.0,    # Replacement lamp assembly
-        "tire_flat": 180.0,      # New tire (mid-range)
+        "glass shatter": 450.0,  # Replacement windscreen/glass
+        "lamp broken": 220.0,    # Replacement lamp assembly
+        "tire flat": 180.0,      # New tire (mid-range)
     }
     
     severity_multipliers = {

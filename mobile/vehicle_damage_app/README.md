@@ -1,17 +1,41 @@
-# vehicle_damage_app
+# Vehicle Damage App
 
-A new Flutter project.
+Flutter client for the Vehicle Damage Assessment system.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- Capture/select vehicle images
+- Upload videos for frame-based analysis
+- View detected damages with confidence and severity
+- Request AUD repair cost estimation
+- Generate assessment summaries
 
-A few resources to get you started if this is your first Flutter project:
+## Requirements
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+- Flutter 3.x
+- Dart SDK compatible with the version in `pubspec.yaml`
+- Backend API running from `backend/`
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Development
+
+```bash
+flutter pub get
+flutter run -d chrome
+```
+
+## Build Web
+
+```bash
+flutter build web --release
+cd build/web
+python -m http.server 8080
+```
+
+Open http://localhost:8080 after starting the local server.
+
+## Backend API Base URL
+
+Update the API base URL in `lib/services/api_service.dart` as needed for your environment:
+
+- Local backend default: `http://127.0.0.1:8000`
+- For physical devices: use your machine LAN IP instead of localhost

@@ -45,7 +45,7 @@ class DamageDetector:
             model_path: Path to the trained model weights
             model_type: Type of model ('yolo', 'yolov8', 'yolo11', 'faster_rcnn', 'rtdetr')
         """
-        self.model_path = model_path or settings.MODEL_PATH
+        self.model_path = self._resolve_model_path(model_path or settings.MODEL_PATH)
         self.model_type = model_type or settings.MODEL_TYPE
         self.device = get_device()
         self.model = None
@@ -55,6 +55,25 @@ class DamageDetector:
         self.image_size = settings.IMAGE_SIZE
         
         self._load_model()
+
+    def _resolve_model_path(self, model_path: str) -> str:
+        """Resolve relative model paths safely across local and container runs."""
+        path = Path(model_path)
+        if path.is_absolute():
+            return str(path)
+
+        candidates = [
+            (Path.cwd() / path).resolve(),
+            (Path(__file__).resolve().parents[2] / path).resolve(),  # backend/
+            (Path(__file__).resolve().parents[3] / path).resolve(),  # repo root
+        ]
+
+        for candidate in candidates:
+            if candidate.exists():
+                return str(candidate)
+
+        # Fall back to cwd resolution so the error message still shows a concrete path.
+        return str(candidates[0])
     
     def _load_model(self):
         """Load the detection model based on model type."""
@@ -278,9 +297,9 @@ class DamageDetector:
             'dent': (255, 0, 0),          # Red
             'scratch': (0, 255, 0),        # Green
             'crack': (0, 0, 255),          # Blue
-            'glass_shatter': (255, 255, 0), # Yellow
-            'lamp_broken': (255, 0, 255),   # Magenta
-            'tire_flat': (0, 255, 255),     # Cyan
+            'glass shatter': (255, 255, 0), # Yellow
+            'lamp broken': (255, 0, 255),   # Magenta
+            'tire flat': (0, 255, 255),     # Cyan
         }
         
         for det in detections:

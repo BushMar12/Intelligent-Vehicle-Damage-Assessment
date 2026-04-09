@@ -95,7 +95,7 @@ class CostEstimationRequest(BaseModel):
     """Request for cost estimation."""
     detections: List[Detection] = Field(..., description="List of damage detections")
     include_labor: bool = Field(True, description="Include labor costs")
-    currency: str = Field("USD", description="Currency for cost display")
+    currency: str = Field("AUD", description="Currency for cost display")
 
 
 class CostEstimationResponse(BaseModel):
@@ -107,7 +107,7 @@ class CostEstimationResponse(BaseModel):
     tax_rate: float = Field(0.0, description="Tax rate applied")
     tax_amount: float = Field(0.0, description="Tax amount")
     total_cost: float = Field(0.0, description="Total estimated repair cost")
-    currency: str = Field("USD", description="Currency")
+    currency: str = Field("AUD", description="Currency")
     estimate_range: Dict[str, float] = Field(
         default_factory=dict, 
         description="Low/high estimate range"

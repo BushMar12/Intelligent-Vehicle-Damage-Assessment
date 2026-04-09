@@ -111,17 +111,17 @@ cost_estimation:
     dent: 200
     scratch: 150
     crack: 300
-    glass_shatter: 500
-    lamp_broken: 250
-    tire_flat: 150
+    "glass shatter": 500
+    "lamp broken": 250
+    "tire flat": 150
   
   severity_multipliers:
     small: 1.0    # area < 5%
     medium: 2.0   # 5% <= area < 15%
     large: 3.5    # area >= 15%
   
-  labor_rate_per_hour: 75
-  currency: "USD"
+  labor_rate_per_hour: 120
+  currency: "AUD"
 
 # Inference settings (for backend)
 inference:

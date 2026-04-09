@@ -74,9 +74,11 @@ Thumbs.db
 
 # Backend
 backend/venv/
+backend/venv_unix_backup/
 backend/uploads/
 backend/outputs/
 backend/__pycache__/
+backend/server.log
 
 # Notebooks outputs
 notebooks/runs/

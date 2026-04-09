@@ -3,12 +3,14 @@ FROM python:3.10-slim
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV MODEL_PATH=/app/models/best_model.pt
 
 # Set work directory
 WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
+    curl \
     libgl1-mesa-glx \
     libglib2.0-0 \
     libsm6 \
@@ -25,7 +27,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app/ ./app/
 
 # Create necessary directories
-RUN mkdir -p uploads outputs models
+RUN mkdir -p uploads outputs /app/models
 
 # Expose port
 EXPOSE 8000

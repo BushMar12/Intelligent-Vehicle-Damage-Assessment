@@ -7,7 +7,7 @@ An end-to-end deep learning system for automatic vehicle damage detection and as
 This project implements a complete vehicle damage assessment pipeline that:
 - Detects 6 types of vehicle damage using state-of-the-art object detection models
 - Supports both **images and videos** for damage detection
-- Compares YOLOv8m and YOLO11m architectures
+- Compares YOLO11m, YOLOv8m, Faster R-CNN, and RT-DETR
 - Provides repair cost estimation in **AUD** (Australian market rates) with 10% GST
 - Generates AI-powered assessment reports
 - Deploys as a Flutter web/mobile application with FastAPI backend
@@ -39,9 +39,10 @@ vehicle_damage_assessment/
 │       │   ├── services/           # API services
 │       │   ├── models/             # Data models
 │       │   └── theme/              # App theming
-│       └── build/web/              # Web build output
 ├── data/
-│   └── CarDD/                      # CarDD Dataset
+│   ├── CarDD/                      # Raw CarDD dataset
+│   └── processed/
+│       └── yolo_dataset/           # Generated YOLO-format dataset
 ├── models/                         # Trained model weights
 │   ├── yolov8m_best.pt            # YOLOv8m trained weights
 │   └── yolo11m_best.pt            # YOLO11m trained weights
@@ -122,12 +123,14 @@ Web app: http://localhost:8080
 
 ## 📊 Model Comparison
 
-The notebook trains and evaluates two models:
+The notebook trains and evaluates four models:
 
 | Model | Architecture | Size | Best For |
 |-------|-------------|------|----------|
-| YOLOv8m | YOLO v8 Medium | 52MB | Balanced speed/accuracy |
 | YOLO11m | YOLO v11 Medium | 41MB | Latest improvements |
+| YOLOv8m | YOLO v8 Medium | 52MB | Balanced speed/accuracy |
+| Faster R-CNN | ResNet50-FPN v2 | Larger | Strong two-stage baseline |
+| RT-DETR | Transformer detector | Larger | End-to-end transformer baseline |
 
 ## 🔌 API Endpoints
 
@@ -206,7 +209,7 @@ Then open http://localhost:8080 in your browser.
 
 ```env
 MODEL_PATH=../models/yolov8m_best.pt
-MODEL_TYPE=yolov8          # yolov8, yolo11
+MODEL_TYPE=yolov8          # yolo, yolov8, yolo11, faster_rcnn, rtdetr
 CONF_THRESHOLD=0.25
 IOU_THRESHOLD=0.45
 ```
@@ -221,6 +224,10 @@ MODEL_TYPE=yolov8
 # Use YOLO11
 MODEL_PATH=../models/yolo11m_best.pt
 MODEL_TYPE=yolo11
+
+# Use RT-DETR
+MODEL_PATH=../models/rtdetr_best.pt
+MODEL_TYPE=rtdetr
 ```
 
 ## 📦 Technologies Used
