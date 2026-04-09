@@ -285,6 +285,43 @@ Use **[TablePlus](https://tableplus.com/)** (free) with these settings:
 | `report_json` | JSON | Full assessment report |
 | `chat_history` | JSON | Conversation history with Qwen |
 
+### View the database (Docker CLI)
+
+Open a terminal and drop into an interactive SQL shell directly inside the container:
+
+```bash
+/Applications/Docker.app/Contents/Resources/bin/docker exec -it vehicle_db psql -U postgres -d vehicledamage
+```
+
+> **Note:** If `docker` is on your PATH (e.g. after running Docker Desktop), you can use `docker exec -it vehicle_db psql -U postgres -d vehicledamage` directly.
+
+**Useful queries once inside `psql`:**
+
+```sql
+-- List all tables
+\dt
+
+-- View all assessments (summary)
+SELECT id, created_at FROM assessments ORDER BY created_at DESC;
+
+-- View damage types and count per assessment
+SELECT id,
+       created_at,
+       jsonb_array_length(detections_json::jsonb) AS damage_count,
+       detections_json::json->0->>'class_name'    AS first_damage
+FROM assessments
+ORDER BY created_at DESC;
+
+-- Show only assessments that have AI chat history
+SELECT id, created_at, chat_history
+FROM assessments
+WHERE chat_history != '[]'
+ORDER BY created_at DESC;
+
+-- Exit psql
+\q
+```
+
 ---
 
 ## 🛠️ Technologies
