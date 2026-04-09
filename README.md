@@ -173,19 +173,7 @@ LLM_API_KEY=ollama
 LLM_MODEL=qwen2.5
 ```
 
-### 3. Start PostgreSQL
-
-Make sure Docker Desktop is open, then:
-```bash
-docker run --name vehicle_db \
-  -e POSTGRES_PASSWORD=postgres \
-  -e POSTGRES_DB=vehicledamage \
-  -p 5432:5432 -d postgres
-```
-
-> Next time after restart: `docker start vehicle_db`
-
-### 4. Start the Qwen AI Model
+### 3. Start the Qwen AI Model (Local AI)
 
 Download and install [Ollama](https://ollama.com), then:
 ```bash
@@ -193,8 +181,30 @@ ollama run qwen2.5
 ```
 Leave this terminal open — it serves the local AI on port `11434`.
 
-### 5. Start the Backend
+### 4. Start the Database and Backend
 
+**Method A: Using Docker Compose (Recommended - Quickest)**
+
+Make sure Docker Desktop is open, then run from the root directory:
+```bash
+docker compose up -d
+```
+*This automatically starts both the PostgreSQL database and the FastAPI backend.* Watch the startup logs with `docker compose logs -f backend`.
+
+**Method B: Manual Setup (Development)**
+
+If you prefer to run components individually:
+
+1. Start PostgreSQL:
+```bash
+docker run --name vehicle_db \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=vehicledamage \
+  -p 5432:5432 -d postgres
+```
+*(Next time after restart: `docker start vehicle_db`)*
+
+2. Start the Backend:
 ```bash
 cd backend
 python -m venv venv && source venv/bin/activate
@@ -203,16 +213,9 @@ pip install -r requirements.txt
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-Watch the startup log — you should see:
-```
-✓ Model pre-loaded successfully
-✓ Database tables initialized
-API Ready!
-```
+API docs will be available at: **http://localhost:8000/docs**
 
-API docs available at: **http://localhost:8000/docs**
-
-### 6. Start the Frontend
+### 5. Start the Frontend
 
 **Web (quickest):**
 ```bash
